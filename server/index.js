@@ -1,5 +1,7 @@
 const express = require('express');
 const next = require('next');
+const connectDB = require('./database')
+
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
@@ -8,13 +10,14 @@ const handle = app.getRequestHandler();
 const server = express();
 
 server.use(express.json());
+server.use(express.urlencoded({ extended: true }))
 
 server.get('/api/users', (req, res) => {
-    res.json({ message: 'this is the route to get list of all users' });
+    res.json({ message: 'this is the route to get all users'})
 });
 
 server.post('/api/users', (req, res) => {
-    res.json({ message: 'this is the route to create a new user'});
+    res.json({ message: 'this is the route to create a new user'})
 })
 
 server.get('/api/users/:userId', (req, res) => {
@@ -37,4 +40,5 @@ app.prepare().then(() => {
         console.log('Server ready at http://localhost:3000');
     });
 });
+
 
