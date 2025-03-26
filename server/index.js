@@ -13,7 +13,17 @@ server.use(express.json());
 server.use(express.urlencoded({ extended: true }))
 
 server.get('/api/users', (req, res) => {
-    res.json({ message: 'this is the route to get all users'})
+    const db = connectDB()
+
+    db.all(`SELECT * FROM users`, [], (err, rows) => {
+        db.close()
+
+        if (err) {
+            res.json({ message: 'there was an error retrieving users from the database' })
+        }
+
+        res.send({ users: rows });
+    })
 });
 
 server.post('/api/users', (req, res) => {
