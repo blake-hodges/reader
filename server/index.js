@@ -15,11 +15,14 @@ server.use(express.urlencoded({ extended: true }))
 server.get('/api/users', (req, res) => {
     const db = connectDB()
 
-    db.all(`SELECT * FROM users`, [], (err, rows) => {
+    const query = `SELECT * FROM users`
+    const params = []
+
+    db.all(query, params, (err, rows) => {
         db.close()
 
         if (err) {
-            res.json({ message: 'there was an error retrieving users from the database' })
+            return res.status(500).json({ message: 'Error retrieving users from the database' })
         }
 
         res.send({ users: rows });
