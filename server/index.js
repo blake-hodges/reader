@@ -16,12 +16,13 @@ server.get('/api/users', (req, res) => {
     const db = connectDB()
 
     const query = `SELECT * FROM users`
-    const params = []
+    const params = [1]
 
     db.all(query, params, (err, rows) => {
         db.close()
-
         if (err) {
+            const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
+            console.error(errorMessage)
             return res.status(500).json({ message: 'Error retrieving users from the database' })
         }
 
