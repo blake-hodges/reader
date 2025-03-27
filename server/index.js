@@ -31,7 +31,28 @@ server.get('/api/users', (req, res) => {
 });
 
 server.post('/api/users', (req, res) => {
-    res.json({ message: 'this is the route to create a new user'})
+    const { name, email } = req.body
+
+    if (!name || !email) {
+        return res.status(400).json({ error: 'Name and email are required' })
+    }
+
+    const db = connectDB()
+
+    const query = `INSERT INTO users (name, email) VALUES (?, ?)`
+    const params = [name, email]
+
+    db.run(query, params, (err) => {
+        db.close()
+
+        if (err) {
+            const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
+            console.error(errorMessage)
+            return res.json({ error: 'error creating user'})
+        }
+        const successMessage = `New user ${name} successfully created.`
+        return res.json({ message: successMessage})
+    })
 })
 
 server.get('/api/users/:userId', (req, res) => {
