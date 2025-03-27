@@ -16,7 +16,7 @@ server.get('/api/users', (req, res) => {
     const db = connectDB()
 
     const query = `SELECT * FROM users`
-    const params = [1]
+    const params = []
 
     db.all(query, params, (err, rows) => {
         db.close()
