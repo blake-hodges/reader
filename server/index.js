@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express');
 const next = require('next');
 const connectDB = require('./database')
@@ -56,7 +57,20 @@ server.post('/api/users', (req, res) => {
 })
 
 server.get('/api/users/:userId', (req, res) => {
-    res.json({ message: 'this is the route to get a user by id'})
+    const userId = path.basename((req.path))
+
+    const db = connectDB()
+
+    const query = `SELECT * FROM users WHERE id = (?)`
+    const params = [userId]
+    
+    db.get(query, params, (err, row) => {
+        db.close()
+        if (err) {
+            console.log(err.message)
+        }
+        res.json({ user: row})
+    })
 })
 
 server.put('/api/users/:userId', (req, res) => {
