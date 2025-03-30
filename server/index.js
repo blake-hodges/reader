@@ -14,6 +14,7 @@ server.use(express.json());
 server.use(express.urlencoded({ extended: true }))
 
 
+
 server.get('/api/users', (req, res) => {
     const db = connectDB()
 
@@ -22,13 +23,18 @@ server.get('/api/users', (req, res) => {
 
     db.all(query, params, (err, rows) => {
         db.close()
+
         if (err) {
             const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
             console.error(errorMessage)
-            return res.status(500).json({ message: 'Error retrieving users from the database' })
+            return res.status(500).json({ message: 'Error retrieving users from the database.' })
         }
 
-        res.send({ users: rows });
+        if (rows.length === 0) {
+            return res.status(404).json({ error: "No users found."})
+        }
+
+        return res.send({ users: rows });
     })
 });
 
@@ -36,7 +42,7 @@ server.post('/api/users', (req, res) => {
     const { name, email } = req.body
 
     if (!name || !email) {
-        return res.status(400).json({ error: 'Name and email are required' })
+        return res.status(400).json({ error: 'Name and email are required.' })
     }
 
     const db = connectDB()
@@ -50,7 +56,7 @@ server.post('/api/users', (req, res) => {
         if (err) {
             const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
             console.error(errorMessage)
-            return res.json({ error: 'error creating user'})
+            return res.status(500).json({ error: 'error creating user'})
         }
         const successMessage = `New user ${name} successfully created.`
         return res.json({ message: successMessage})
@@ -75,11 +81,11 @@ server.get('/api/users/:userId', (req, res) => {
         if (err) {
             const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
             console.error(errorMessage)
-            return res.status(500).json({ error: "Error retrieving user data" })
+            return res.status(500).json({ error: "Error retrieving user data." })
         }
 
         if (!row) {
-            return res.json({ error: "User not found"})
+            return res.status(404).json({ error: "User not found."})
         }
 
         return res.json({ user: row})
