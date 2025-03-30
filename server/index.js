@@ -2,6 +2,7 @@ const path = require('path')
 const express = require('express');
 const next = require('next');
 const connectDB = require('./database')
+const handleServerError = require('./helpers/handleServerError')
 
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -13,28 +14,27 @@ const server = express();
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }))
 
-
-
 server.get('/api/users', (req, res) => {
     const db = connectDB()
 
     const query = `SELECT * FROM users`
-    const params = []
 
-    db.all(query, params, (err, rows) => {
+    db.all(query, [], (err, rows) => {
         db.close()
 
         if (err) {
-            const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
-            console.error(errorMessage)
-            return res.status(500).json({ message: 'Error retrieving users from the database.' })
+            return handleServerError(res, err, 'Error retrieving users from the database.')
         }
 
         if (rows.length === 0) {
-            return res.status(404).json({ error: "No users found."})
+            return res.status(404).json({
+                error: "No users found."
+            })
         }
 
-        return res.send({ users: rows });
+        return res.send({
+            users: rows
+        });
     })
 });
 
@@ -42,7 +42,9 @@ server.post('/api/users', (req, res) => {
     const { name, email } = req.body
 
     if (!name || !email) {
-        return res.status(400).json({ error: 'Name and email are required.' })
+        return res.status(400).json({
+             error: 'Name and email are required.'
+        })
     }
 
     const db = connectDB()
@@ -54,12 +56,12 @@ server.post('/api/users', (req, res) => {
         db.close()
 
         if (err) {
-            const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
-            console.error(errorMessage)
-            return res.status(500).json({ error: 'error creating user'})
+            return handleServerError(res, err, 'Error creating user.')
         }
-        const successMessage = `New user ${name} successfully created.`
-        return res.json({ message: successMessage})
+
+        return res.json({
+            message: `New user ${name} successfully created.`
+        })
     })
 })
 
@@ -67,7 +69,9 @@ server.get('/api/users/:userId', (req, res) => {
     const { userId } = req.params
 
     if (!userId || isNaN(userId)) {
-        return res.status(400).json({ error: "User ID is missing or invalid."})
+        return res.status(400).json({
+            error: "User ID is missing or invalid."
+        })
     }
 
     const db = connectDB()
@@ -79,16 +83,18 @@ server.get('/api/users/:userId', (req, res) => {
         db.close()
 
         if (err) {
-            const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
-            console.error(errorMessage)
-            return res.status(500).json({ error: "Error retrieving user data." })
+            return handleServerError(res, err, 'Error retrieving user data.')
         }
 
         if (!row) {
-            return res.status(404).json({ error: "User not found."})
+            return res.status(404).json({
+                error: "User not found."
+            })
         }
 
-        return res.json({ user: row})
+        return res.json({
+            user: row
+        })
     })
 })
 
