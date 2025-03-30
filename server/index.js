@@ -13,6 +13,7 @@ const server = express();
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }))
 
+
 server.get('/api/users', (req, res) => {
     const db = connectDB()
 
@@ -57,19 +58,31 @@ server.post('/api/users', (req, res) => {
 })
 
 server.get('/api/users/:userId', (req, res) => {
-    const userId = path.basename((req.path))
+    const { userId } = req.params
+
+    if (!userId || isNaN(userId)) {
+        return res.status(400).json({ error: "User ID is missing or invalid."})
+    }
 
     const db = connectDB()
 
     const query = `SELECT * FROM users WHERE id = (?)`
     const params = [userId]
-    
+
     db.get(query, params, (err, row) => {
         db.close()
+
         if (err) {
-            console.log(err.message)
+            const errorMessage = `[ERROR] ${new Date().toISOString()}: ${err.message}`
+            console.error(errorMessage)
+            return res.status(500).json({ error: "Error retrieving user data" })
         }
-        res.json({ user: row})
+
+        if (!row) {
+            return res.json({ error: "User not found"})
+        }
+
+        return res.json({ user: row})
     })
 })
 
@@ -80,6 +93,7 @@ server.put('/api/users/:userId', (req, res) => {
 server.delete('/api/users/:userId', (req, res) => {
     res.json({ message: 'this is the route to delete a user'})
 })
+
 
 app.prepare().then(() => {
     server.all('*', (req, res) => handle(req, res));
