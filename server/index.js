@@ -3,7 +3,7 @@ const express = require('express');
 const next = require('next');
 const connectDB = require('./database')
 const handleServerError = require('./helpers/handleServerError')
-const { list, create, userByID, remove } = require('./controllers/user.controller')
+const { list, create, userByID, remove, update } = require('./controllers/user.controller')
 
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -21,9 +21,7 @@ server.post('/api/users', create)
 
 server.get('/api/users/:userId', userByID)
 
-server.put('/api/users/:userId', (req, res) => {
-    res.json({ message: 'this is the route to update data for a specific user'})
-})
+server.put('/api/users/:userId', update)
 
 server.delete('/api/users/:userId', remove)
 
