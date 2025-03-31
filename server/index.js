@@ -3,6 +3,7 @@ const express = require('express');
 const next = require('next');
 const connectDB = require('./database')
 const handleServerError = require('./helpers/handleServerError')
+const list = require('./controllers/user.controller')
 
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -14,29 +15,8 @@ const server = express();
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }))
 
-server.get('/api/users', (req, res) => {
-    const db = connectDB()
+server.get('/api/users', list)
 
-    const query = `SELECT * FROM users`
-
-    db.all(query, [], (err, rows) => {
-        db.close()
-
-        if (err) {
-            return handleServerError(res, err, 'Error retrieving users from the database.')
-        }
-
-        if (rows.length === 0) {
-            return res.status(404).json({
-                error: "No users found."
-            })
-        }
-
-        return res.send({
-            users: rows
-        });
-    })
-});
 
 server.post('/api/users', (req, res) => {
     const { name, email } = req.body
