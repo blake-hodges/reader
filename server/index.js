@@ -3,7 +3,7 @@ const express = require('express');
 const next = require('next');
 const connectDB = require('./database')
 const handleServerError = require('./helpers/handleServerError')
-const list = require('./controllers/user.controller')
+const { list, create } = require('./controllers/user.controller')
 
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -18,32 +18,7 @@ server.use(express.urlencoded({ extended: true }))
 server.get('/api/users', list)
 
 
-server.post('/api/users', (req, res) => {
-    const { name, email } = req.body
-
-    if (!name || !email) {
-        return res.status(400).json({
-             error: 'Name and email are required.'
-        })
-    }
-
-    const db = connectDB()
-
-    const query = `INSERT INTO users (name, email) VALUES (?, ?)`
-    const params = [name, email]
-
-    db.run(query, params, (err) => {
-        db.close()
-
-        if (err) {
-            return handleServerError(res, err, 'Error creating user.')
-        }
-
-        return res.json({
-            message: `New user ${name} successfully created.`
-        })
-    })
-})
+server.post('/api/users', create)
 
 server.get('/api/users/:userId', (req, res) => {
     const { userId } = req.params
