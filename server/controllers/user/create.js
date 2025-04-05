@@ -1,5 +1,7 @@
 const connectDB = require('../../database')
 const handleServerError = require('../../helpers/handleServerError')
+const User = require('../../models/user.model.js')
+
 
 const create = (req, res) => {
     const { name, email } = req.body
@@ -10,21 +12,15 @@ const create = (req, res) => {
         })
     }
 
-    const db = connectDB()
-
-    const query = `INSERT INTO users (name, email) VALUES (?, ?)`
-    const params = [name, email]
-
-    db.run(query, params, (err) => {
-        db.close()
-
+    User.addNewUser({ name: name, email: email}, (err, user) => {
         if (err) {
-            return handleServerError(res, err, 'Error creating user.')
+            return res.json({
+                'error': 'there was an error'
+            })
         }
-
         return res.json({
-            message: `New user ${name} successfully created.`
-        })
+            message: `New user created. Name: ${user.name} Email: ${user.email}`}
+        )
     })
 }
 
